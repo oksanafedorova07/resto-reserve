@@ -82,16 +82,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🔑 Configure SSH Agent
-        uses: webfactory/ssh-agent@v0.5.1
-        with:
-          ssh-private-key: ${{ secrets.DEPLOY_KEY }}
+
 
       - name: 🖥️ Deploy via SSH
         uses: appleboy/ssh-action@v1.0.1
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
             # Проверка подключения
