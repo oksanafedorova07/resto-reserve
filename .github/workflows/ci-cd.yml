@@ -96,7 +96,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             # Перейти в домашнюю папку
-            cd /home/${{ secrets.SSH_USERNAME }} || exit
+            cd /home/${{ secrets.DEPLOY_USER }} || exit
 
             # Создать папку resto-reserve и клонировать репозиторий, если нужно
             if [ ! -d "resto-reserve" ]; then
@@ -107,22 +107,24 @@ jobs:
             cd resto-reserve || exit
 
             # Убедиться, что нужная ветка существует
-            git fetch origin main
+            git fetch origin ${{ github.ref_name }}
 
             # Переключиться на ветку и обновиться
-            git checkout main
-            git pull origin main
+            git checkout ${{ github.ref_name }}
+            git pull origin ${{ github.ref_name }}
 
             # Обновить .env из секретов
             cat > .env << EOF
             DEBUG=${{ secrets.DEBUG }}
             SECRET_KEY=${{ secrets.SECRET_KEY }}
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
-            TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
-            DB_HOST=db
+            ALLOWED_HOSTS=localhost,127.0.0.1,130.193.34.169
             DB_NAME=resto_reserve
             DB_USER=postgres
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_HOST=db
+            DB_PORT=5432
+            TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+            TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
             EOF
 
             # Перезапустить сервисы
