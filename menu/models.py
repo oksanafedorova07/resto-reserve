@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class MenuCategory(models.Model):
     """Категория блюд в меню"""
 
