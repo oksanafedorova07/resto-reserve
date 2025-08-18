@@ -8,6 +8,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from menu.models import MenuItem
+
 from .forms import BookingForm, ContactForm
 from .models import Booking, SiteContent, Table, TeamMember
 from .utils import (
@@ -15,7 +17,6 @@ from .utils import (
     format_contact_message,
     send_telegram_message,
 )
-from menu.models import MenuItem
 
 
 def home(request):
