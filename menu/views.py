@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import render
 from django.views.generic import DetailView, ListView
 
 from .models import MenuCategory, MenuItem

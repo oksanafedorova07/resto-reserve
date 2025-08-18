@@ -1,7 +1,7 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
+
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -11,7 +11,7 @@ from django.views.decorators.http import require_POST
 from menu.models import MenuItem
 
 from .forms import BookingForm, ContactForm
-from .models import Booking, SiteContent, Table, TeamMember
+from .models import Booking, Table, TeamMember
 from .utils import (
     format_booking_notification,
     format_contact_message,
@@ -213,6 +213,9 @@ def booking_detail(request, booking_id):
         "booking": booking,
     }
     return render(request, "booking/booking_detail.html", context)
+
+
+
 
 
 from django.contrib.admin.views.decorators import staff_member_required

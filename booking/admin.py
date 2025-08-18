@@ -125,7 +125,8 @@ class BookingAdmin(admin.ModelAdmin):
         """Действия администратора"""
         if obj.status == "pending" and obj.has_preorder:
             return format_html(
-                '<a href="{}" class="button" style="background: #28a745; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px;">Подтвердить предоплату</a>',
+                '<a href="{}" class="button" style="background: #28a745; color: white; '
+                'padding: 5px 10px; text-decoration: none; border-radius: 3px;">Подтвердить предоплату</a>',
                 f"/admin/booking/booking/{obj.id}/confirm-payment/",
             )
         elif obj.deposit_paid and obj.deposit_confirmed_by:

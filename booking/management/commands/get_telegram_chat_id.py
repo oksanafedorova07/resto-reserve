@@ -1,4 +1,4 @@
-import json
+
 
 import requests
 from django.conf import settings
@@ -62,7 +62,7 @@ class Command(BaseCommand):
 
             if chat_ids:
                 self.stdout.write(
-                    self.style.SUCCESS(f"\nДобавьте один из Chat ID в settings.py:\n")
+                    self.style.SUCCESS("\nДобавьте один из Chat ID в settings.py:\n")
                 )
                 for chat_id in chat_ids:
                     self.stdout.write(f'TELEGRAM_CHAT_ID = "{chat_id}"')

@@ -3,8 +3,7 @@ from datetime import date, time, timedelta
 from decimal import Decimal
 
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
+
 
 from .models import Booking, Table
 
@@ -287,7 +286,7 @@ class BookingForm(forms.ModelForm):
         time_str = cleaned_data.get("time")
         table = cleaned_data.get("table")
         guests_count = cleaned_data.get("guests_count")
-        selected_items = cleaned_data.get("selected_items", [])
+
         deposit_amount = cleaned_data.get("deposit_amount", 0)
 
         # Проверяем, что количество гостей не превышает вместимость столика
@@ -296,7 +295,8 @@ class BookingForm(forms.ModelForm):
                 table_obj = Table.objects.get(id=int(table))
                 if guests_count > table_obj.seats:
                     raise forms.ValidationError(
-                        f"Столик №{table_obj.number} вмещает максимум {table_obj.seats} человек. Выберите другой столик или уменьшите количество гостей."
+                        f"Столик №{table_obj.number} вмещает максимум {table_obj.seats} человек. "
+                        f"Выберите другой столик или уменьшите количество гостей."
                     )
             except (Table.DoesNotExist, ValueError):
                 pass
@@ -305,7 +305,7 @@ class BookingForm(forms.ModelForm):
             try:
                 # Преобразуем строку времени в объект time для сравнения
                 hour, minute = map(int, time_str.split(":"))
-                booking_time = time(hour, minute)
+
 
                 # Проверяем, не занят ли столик
                 existing_booking = Booking.objects.filter(
@@ -317,7 +317,8 @@ class BookingForm(forms.ModelForm):
 
                 if existing_booking:
                     raise forms.ValidationError(
-                        "Этот столик уже забронирован на указанное время. Выберите другое время или другой столик."
+                        "Этот столик уже забронирован на указанное время. "
+                        "Выберите другое время или другой столик."
                     )
             except ValueError:
                 pass  # Ошибка времени уже обработана в clean_time
@@ -364,7 +365,8 @@ class BookingForm(forms.ModelForm):
             )  # 30% от суммы предзаказа
             if deposit_amount < min_deposit:
                 raise forms.ValidationError(
-                    f"При предзаказе на сумму {preorder_total} ₽ минимальная предоплата составляет {min_deposit} ₽."
+                    f"При предзаказе на сумму {preorder_total} ₽ "
+                    f"минимальная предоплата составляет {min_deposit} ₽."
                 )
 
         # Сохраняем рассчитанные данные
