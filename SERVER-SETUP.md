@@ -3,7 +3,7 @@
 ## 📋 Информация о сервере
 - **IP адрес**: 130.193.34.169
 - **Название**: test2
-- **Пользователь для деплоя**: deploy
+- **Пользователь для деплоя**: test2
 
 ## 🚀 Пошаговая настройка
 
@@ -12,35 +12,36 @@
 ssh root@130.193.34.169
 ```
 
-### 2. Создание пользователя deploy
+### 2. Создание пользователя test2 (если не существует)
 ```bash
-# Создать пользователя
-sudo useradd -m -s /bin/bash deploy
+# Проверить, существует ли пользователь test2
+id test2
 
-# Добавить в группу sudo
-sudo usermod -aG sudo deploy
-
-# Установить пароль (временно)
-echo "deploy:deploy123" | sudo chpasswd
+# Если пользователь не существует, создать его
+if ! id test2 &>/dev/null; then
+    sudo useradd -m -s /bin/bash test2
+    sudo usermod -aG sudo test2
+    echo "test2:test2123" | sudo chpasswd
+fi
 ```
 
-### 3. Настройка SSH для пользователя deploy
+### 3. Настройка SSH для пользователя test2
 ```bash
 # Создать папку .ssh
-sudo mkdir -p /home/deploy/.ssh
-sudo chown deploy:deploy /home/deploy/.ssh
-sudo chmod 700 /home/deploy/.ssh
+sudo mkdir -p /home/test2/.ssh
+sudo chown test2:test2 /home/test2/.ssh
+sudo chmod 700 /home/test2/.ssh
 
 # Создать файл authorized_keys
-sudo touch /home/deploy/.ssh/authorized_keys
-sudo chown deploy:deploy /home/deploy/.ssh/authorized_keys
-sudo chmod 600 /home/deploy/.ssh/authorized_keys
+sudo touch /home/test2/.ssh/authorized_keys
+sudo chown test2:test2 /home/test2/.ssh/authorized_keys
+sudo chmod 600 /home/test2/.ssh/authorized_keys
 ```
 
 ### 4. Добавить публичный ключ
 ```bash
 # Открыть файл для редактирования
-sudo nano /home/deploy/.ssh/authorized_keys
+sudo nano /home/test2/.ssh/authorized_keys
 ```
 
 **Вставить следующий публичный ключ:**
@@ -58,8 +59,8 @@ sudo apt-get upgrade -y
 curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 
-# Добавить пользователя deploy в группу docker
-sudo usermod -aG docker deploy
+# Добавить пользователя test2 в группу docker
+sudo usermod -aG docker test2
 
 # Удалить скрипт установки
 rm get-docker.sh
@@ -80,19 +81,19 @@ docker-compose --version
 ### 7. Создание папки проекта
 ```bash
 # Создать папку для проекта
-sudo mkdir -p /home/deploy/resto-reserve
-sudo chown deploy:deploy /home/deploy/resto-reserve
+sudo mkdir -p /home/test2/resto-reserve
+sudo chown test2:test2 /home/test2/resto-reserve
 ```
 
 ### 8. Тестирование подключения
 ```bash
-# Переключиться на пользователя deploy
-sudo su - deploy
+# Переключиться на пользователя test2
+sudo su - test2
 
 # Проверить, что SSH работает
-ssh deploy@localhost
+ssh test2@localhost
 
-# Выйти из пользователя deploy
+# Выйти из пользователя test2
 exit
 ```
 
@@ -116,7 +117,7 @@ sudo ufw status
 
 ### Тест SSH подключения с вашего компьютера:
 ```bash
-ssh deploy@130.193.34.169
+ssh test2@130.193.34.169
 ```
 
 Если подключение успешно, вы должны увидеть приглашение командной строки.
@@ -124,7 +125,7 @@ ssh deploy@130.193.34.169
 ### Тест Docker:
 ```bash
 # Подключиться к серверу
-ssh deploy@130.193.34.169
+ssh test2@130.193.34.169
 
 # Проверить Docker
 docker --version
@@ -140,7 +141,7 @@ docker-compose --version
 | Имя секрета | Значение |
 |-------------|----------|
 | `DEPLOY_HOST` | `130.193.34.169` |
-| `DEPLOY_USER` | `deploy` |
+| `DEPLOY_USER` | `test2` |
 | `SSH_PORT` | `22` |
 | `DEPLOY_KEY` | [Приватный ключ из файла] |
 | `DEBUG` | `False` |
@@ -155,7 +156,7 @@ docker-compose --version
 1. Проверьте, что публичный ключ добавлен правильно
 2. Проверьте права доступа к файлам:
    ```bash
-   ls -la /home/deploy/.ssh/
+   ls -la /home/test2/.ssh/
    ```
 3. Проверьте логи SSH:
    ```bash
@@ -169,7 +170,7 @@ docker-compose --version
    ```
 2. Проверьте, что пользователь в группе docker:
    ```bash
-   groups deploy
+   groups test2
    ```
 
 ### Если деплой не работает:

@@ -14,8 +14,8 @@ fi
 echo "✅ SSH ключ найден"
 
 # Тест подключения с подробным выводом
-echo "🔗 Тестирую подключение к deploy@130.193.34.169..."
-ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o ConnectTimeout=10 -v deploy@130.193.34.169 "echo 'SSH подключение успешно!' && whoami && pwd"
+echo "🔗 Тестирую подключение к test2@130.193.34.169..."
+ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o ConnectTimeout=10 -v test2@130.193.34.169 "echo 'SSH подключение успешно!' && whoami && pwd"
 
 if [ $? -eq 0 ]; then
     echo "✅ SSH подключение работает!"
