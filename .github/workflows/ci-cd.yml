@@ -95,8 +95,20 @@ jobs:
           key: ${{ secrets.DEPLOY_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
+            # Проверка подключения
+            echo "🔍 Проверяю подключение к серверу..."
+            whoami
+            pwd
+            ls -la
+
             # Перейти в домашнюю папку
             cd /home/${{ secrets.DEPLOY_USER }} || exit
+            echo "📁 Перешел в папку: $(pwd)"
+
+            # Проверить наличие Docker
+            echo "🐳 Проверяю Docker..."
+            docker --version
+            docker-compose --version
 
             # Создать папку resto-reserve и клонировать репозиторий, если нужно
             if [ ! -d "resto-reserve" ]; then
@@ -105,8 +117,10 @@ jobs:
             fi
 
             cd resto-reserve || exit
+            echo "📁 Перешел в папку проекта: $(pwd)"
 
             # Убедиться, что нужная ветка существует
+            echo "🌿 Получаю ветку: ${{ github.ref_name }}"
             git fetch origin ${{ github.ref_name }}
 
             # Переключиться на ветку и обновиться
@@ -114,6 +128,7 @@ jobs:
             git pull origin ${{ github.ref_name }}
 
             # Обновить .env из секретов
+            echo "⚙️ Создаю .env файл..."
             cat > .env << EOF
             DEBUG=${{ secrets.DEBUG }}
             SECRET_KEY=${{ secrets.SECRET_KEY }}
@@ -126,6 +141,13 @@ jobs:
             TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
             TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
             EOF
+
+            echo "📄 Содержимое .env файла:"
+            cat .env
+
+            # Проверить наличие docker-compose.yml
+            echo "📋 Проверяю наличие docker-compose.yml..."
+            ls -la docker-compose.yml
 
             # Перезапустить сервисы
             echo "🔄 Останавливаю контейнеры..."
