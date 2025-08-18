@@ -209,19 +209,10 @@ def booking_success(request):
 def booking_detail(request, booking_id):
     """Детальный просмотр бронирования"""
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
-    context = {
-        "booking": booking,
-    }
+    return render(request, "booking/booking_detail.html", {"booking": booking})
+
+
 from django.contrib.admin.views.decorators import staff_member_required
-
-
-def booking_detail(request, booking_id):
-    """Детальный просмотр бронирования"""
-    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
-    context = {
-        "booking": booking,
-    }
-    return render(request, "booking/booking_detail.html", context)
 
 
 @staff_member_required
