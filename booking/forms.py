@@ -306,7 +306,6 @@ class BookingForm(forms.ModelForm):
                 # Преобразуем строку времени в объект time для сравнения
                 hour, minute = map(int, time_str.split(":"))
 
-
                 # Проверяем, не занят ли столик
                 existing_booking = Booking.objects.filter(
                     table_id=int(table),

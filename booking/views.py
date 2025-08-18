@@ -215,9 +215,6 @@ def booking_detail(request, booking_id):
     return render(request, "booking/booking_detail.html", context)
 
 
-
-
-
 from django.contrib.admin.views.decorators import staff_member_required
 
 
