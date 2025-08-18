@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -210,9 +211,6 @@ def booking_detail(request, booking_id):
     """Детальный просмотр бронирования"""
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
     return render(request, "booking/booking_detail.html", {"booking": booking})
-
-
-from django.contrib.admin.views.decorators import staff_member_required
 
 
 @staff_member_required
