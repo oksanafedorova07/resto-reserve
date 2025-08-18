@@ -1,0 +1,105 @@
+name: 🚀 Деплой на виртуальную машину
+
+on:
+  push:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+env:
+  DOCKER_IMAGE: resto-reserve
+  DOCKER_TAG: latest
+
+jobs:
+  deploy:
+    name: 🖥️ Деплой на VM
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🔐 Setup SSH
+      uses: webfactory/ssh-agent@v0.8.0
+      with:
+        ssh-private-key: ${{ secrets.DEPLOY_KEY }}
+
+    - name: 🔐 Add VM to known hosts
+      run: |
+        ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+
+    - name: 🚀 Deploy to VM
+      run: |
+        echo "🚀 Начинаем деплой на виртуальную машину..."
+        
+        # Подключение к VM и выполнение команд деплоя
+        ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+          echo "📦 Обновление системы..."
+          sudo apt-get update -y
+          
+          echo "🐳 Установка Docker (если не установлен)..."
+          if ! command -v docker &> /dev/null; then
+            curl -fsSL https://get.docker.com -o get-docker.sh
+            sudo sh get-docker.sh
+            sudo usermod -aG docker $USER
+          fi
+          
+          echo "🐳 Установка Docker Compose (если не установлен)..."
+          if ! command -v docker-compose &> /dev/null; then
+            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+          fi
+          
+          echo "📁 Создание директории проекта..."
+          mkdir -p ~/resto-reserve
+          cd ~/resto-reserve
+          
+          echo "📥 Клонирование/обновление репозитория..."
+          if [ -d ".git" ]; then
+            git pull origin main
+          else
+            git clone https://github.com/${{ github.repository }}.git .
+          fi
+          
+          echo "🔧 Создание .env файла..."
+          if [ ! -f ".env" ]; then
+            cp env.example .env
+            echo "⚠️  Не забудьте настроить .env файл на сервере!"
+          fi
+          
+          echo "🐳 Остановка старых контейнеров..."
+          docker-compose down || true
+          
+          echo "🐳 Сборка и запуск новых контейнеров..."
+          docker-compose build --no-cache
+          docker-compose up -d
+          
+          echo "🧹 Очистка неиспользуемых образов..."
+          docker image prune -f
+          
+          echo "✅ Деплой завершен!"
+          echo "🌐 Приложение доступно по адресу: http://${{ secrets.DEPLOY_HOST }}"
+        EOF
+
+    - name: 📊 Health Check
+      run: |
+        echo "🔍 Проверка работоспособности приложения..."
+        sleep 30  # Ждем запуска приложения
+        
+        # Проверяем доступность приложения
+        if curl -f http://${{ secrets.DEPLOY_HOST }}/health/; then
+          echo "✅ Приложение успешно запущено!"
+        else
+          echo "❌ Приложение недоступно!"
+          exit 1
+        fi
+
+    - name: 📢 Уведомление о деплое
+      if: always()
+      run: |
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "✅ Деплой на VM успешно завершен!"
+          echo "🌐 URL: http://${{ secrets.DEPLOY_HOST }}"
+        else
+          echo "❌ Ошибка при деплое на VM!"
+        fi

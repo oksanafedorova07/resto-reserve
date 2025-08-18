@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from django.utils import timezone
 from .models import Table, Booking, TeamMember, SiteContent
 
 @admin.register(Table)
@@ -21,13 +22,14 @@ class TableAdmin(admin.ModelAdmin):
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
-    list_display = ['name', 'phone', 'table', 'date', 'time', 'guests_count', 'status', 'preorder_info', 'payment_info', 'created_at']
+    list_display = ['name', 'phone', 'table', 'date', 'time', 'guests_count', 'status', 'preorder_info', 'payment_info', 'admin_actions']
     list_filter = ['status', 'date', 'table', 'has_preorder', 'deposit_paid', 'created_at']
     search_fields = ['name', 'phone', 'comments']
     ordering = ['-created_at']
     date_hierarchy = 'date'
-    readonly_fields = ['created_at', 'deposit_paid_at', 'preorder_items_display']
+    readonly_fields = ['created_at', 'deposit_paid_at', 'deposit_confirmed_by', 'deposit_confirmed_at', 'preorder_items_display']
     list_editable = ['status']
+    actions = ['confirm_payment_action']
     
     fieldsets = (
         ('Информация о клиенте', {
@@ -37,7 +39,7 @@ class BookingAdmin(admin.ModelAdmin):
             'fields': ('table', 'date', 'time', 'guests_count')
         }),
         ('Предзаказ и оплата', {
-            'fields': ('has_preorder', 'preorder_total', 'preorder_items_display', 'deposit_amount', 'deposit_paid', 'deposit_paid_at')
+            'fields': ('has_preorder', 'preorder_total', 'preorder_items_display', 'deposit_amount', 'deposit_paid', 'deposit_paid_at', 'deposit_confirmed_by', 'deposit_confirmed_at')
         }),
         ('Статус и комментарии', {
             'fields': ('status', 'comments')
@@ -70,11 +72,49 @@ class BookingAdmin(admin.ModelAdmin):
         if obj.has_preorder and obj.preorder_items:
             items_html = "<ul style='margin: 0; padding-left: 20px;'>"
             for item in obj.preorder_items:
-                items_html += f"<li>{item['name']} - {item['price']} ₽</li>"
+                quantity = item.get('quantity', 1)
+                if quantity > 1:
+                    items_html += f"<li>{item['name']} x{quantity} = {item['total']} ₽</li>"
+                else:
+                    items_html += f"<li>{item['name']} - {item['price']} ₽</li>"
             items_html += "</ul>"
             return format_html(items_html)
         return "Нет предзаказа"
     preorder_items_display.short_description = 'Предзаказанные блюда'
+    
+    def admin_actions(self, obj):
+        """Действия администратора"""
+        if obj.status == 'pending' and obj.has_preorder:
+            return format_html(
+                '<a href="{}" class="button" style="background: #28a745; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px;">Подтвердить предоплату</a>',
+                f'/admin/booking/booking/{obj.id}/confirm-payment/'
+            )
+        elif obj.deposit_paid and obj.deposit_confirmed_by:
+            return format_html(
+                '<span style="color: #28a745;">✓ Подтверждено {}</span>',
+                obj.deposit_confirmed_by.get_full_name() or obj.deposit_confirmed_by.username
+            )
+        return "—"
+    admin_actions.short_description = 'Действия'
+    
+    def confirm_payment_action(self, request, queryset):
+        """Массовое подтверждение предоплат"""
+        confirmed_count = 0
+        for booking in queryset:
+            if booking.status == 'pending' and booking.has_preorder:
+                booking.status = 'paid'
+                booking.deposit_paid = True
+                booking.deposit_paid_at = timezone.now()
+                booking.deposit_confirmed_by = request.user
+                booking.deposit_confirmed_at = timezone.now()
+                booking.save()
+                confirmed_count += 1
+        
+        if confirmed_count > 0:
+            self.message_user(request, f'Подтверждено {confirmed_count} предоплат.')
+        else:
+            self.message_user(request, 'Нет бронирований для подтверждения предоплаты.')
+    confirm_payment_action.short_description = 'Подтвердить предоплату для выбранных бронирований'
 
 
 

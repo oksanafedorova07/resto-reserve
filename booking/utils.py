@@ -96,6 +96,22 @@ def format_booking_notification(booking):
         preorder_info = f"""
 🍽️ <b>Предзаказ:</b> {booking.preorder_total} ₽
 💳 <b>Предоплата:</b> {booking.deposit_amount} ₽"""
+        
+        # Добавляем информацию о подтверждении
+        if booking.deposit_confirmed_by:
+            preorder_info += f"""
+✅ <b>Подтверждено:</b> {booking.deposit_confirmed_by.get_full_name() or booking.deposit_confirmed_by.username}
+⏰ <b>Дата:</b> {booking.deposit_confirmed_at.strftime('%d.%m.%Y %H:%M') if booking.deposit_confirmed_at else 'Не указана'}"""
+        
+        # Добавляем детали предзаказа
+        if booking.preorder_items:
+            preorder_info += "\n\n📋 <b>Детали заказа:</b>"
+            for item in booking.preorder_items:
+                quantity = item.get('quantity', 1)
+                if quantity > 1:
+                    preorder_info += f"\n• {item['name']} x{quantity} = {item['total']} ₽"
+                else:
+                    preorder_info += f"\n• {item['name']} = {item['price']} ₽"
     
     formatted_message = f"""
 {emoji} <b>НОВОЕ БРОНИРОВАНИЕ</b>

@@ -79,7 +79,7 @@ def booking_page(request):
             # Устанавливаем данные предзаказа и предоплаты
             booking.preorder_total = form.cleaned_data.get('preorder_total', 0)
             booking.preorder_items = form.cleaned_data.get('preorder_items', [])
-            booking.has_preorder = form.cleaned_data.get('has_preorder', False)
+            booking.has_preorder = len(form.cleaned_data.get('preorder_items', [])) > 0
             booking.deposit_amount = form.cleaned_data.get('deposit_amount', 0)
             
             # Устанавливаем статус в зависимости от наличия предзаказа
@@ -98,7 +98,11 @@ def booking_page(request):
             if booking.has_preorder:
                 items_info = "\n\nПредзаказанные блюда:"
                 for item in booking.preorder_items:
-                    items_info += f"\n- {item['name']} - {item['price']} ₽"
+                    quantity = item.get('quantity', 1)
+                    if quantity > 1:
+                        items_info += f"\n- {item['name']} x{quantity} - {item['price']} ₽ за шт. = {item['total']} ₽"
+                    else:
+                        items_info += f"\n- {item['name']} - {item['price']} ₽"
                 items_info += f"\n\nОбщая стоимость предзаказа: {booking.preorder_total} ₽"
                 items_info += f"\nСумма предоплаты: {booking.deposit_amount} ₽"
                 
@@ -183,22 +187,46 @@ def booking_detail(request, booking_id):
     }
     return render(request, 'booking/booking_detail.html', context)
 
-@login_required
+from django.contrib.admin.views.decorators import staff_member_required
+
+@staff_member_required
 @require_POST
 def confirm_payment(request, booking_id):
-    """Подтверждение внесения предоплаты"""
-    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+    """Подтверждение внесения предоплаты администратором"""
+    booking = get_object_or_404(Booking, id=booking_id)
     
     if booking.status == 'pending' and booking.has_preorder:
         booking.status = 'paid'
         booking.deposit_paid = True
         booking.deposit_paid_at = timezone.now()
+        booking.deposit_confirmed_by = request.user
+        booking.deposit_confirmed_at = timezone.now()
         booking.save()
-        messages.success(request, 'Предоплата подтверждена! Ваше бронирование и предзаказ активны.')
+        
+        # Отправляем уведомление в Telegram о подтверждении предоплаты
+        telegram_message = f"""
+💰 <b>ПРЕДОПЛАТА ПОДТВЕРЖДЕНА</b>
+
+👤 <b>Клиент:</b> {booking.name}
+📞 <b>Телефон:</b> {booking.phone}
+📅 <b>Дата:</b> {booking.date.strftime('%d.%m.%Y')}
+🕐 <b>Время:</b> {booking.time.strftime('%H:%M')}
+🪑 <b>Столик:</b> №{booking.table.number}
+💳 <b>Сумма предоплаты:</b> {booking.deposit_amount} ₽
+
+👨‍💼 <b>Подтвердил:</b> {request.user.get_full_name() or request.user.username}
+⏰ <b>Время подтверждения:</b> {timezone.now().strftime('%d.%m.%Y %H:%M')}
+
+---
+<i>ID бронирования: {booking.id}</i>
+"""
+        send_telegram_message(telegram_message)
+        
+        messages.success(request, f'Предоплата для бронирования {booking.name} подтверждена!')
     else:
         messages.error(request, 'Невозможно подтвердить предоплату для данного бронирования.')
     
-    return redirect('user:my_bookings')
+    return redirect('admin:booking_booking_changelist')
 
 @login_required
 @require_POST

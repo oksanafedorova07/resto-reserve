@@ -39,6 +39,15 @@ class Booking(models.Model):
     deposit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Сумма предоплаты')
     deposit_paid = models.BooleanField(default=False, verbose_name='Предоплата внесена')
     deposit_paid_at = models.DateTimeField(null=True, blank=True, verbose_name='Дата внесения предоплаты')
+    deposit_confirmed_by = models.ForeignKey(
+        get_user_model(), 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='confirmed_deposits',
+        verbose_name='Подтвердил администратор'
+    )
+    deposit_confirmed_at = models.DateTimeField(null=True, blank=True, verbose_name='Дата подтверждения администратором')
     
     # Поля для предзаказа меню
     has_preorder = models.BooleanField(default=False, verbose_name='Есть предзаказ')
