@@ -6,43 +6,63 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('booking', '0003_menuitem'),
+        ("booking", "0003_menuitem"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='booking',
-            options={'ordering': ['-created_at'], 'verbose_name': 'Бронирование', 'verbose_name_plural': 'Бронирования'},
+            name="booking",
+            options={
+                "ordering": ["-created_at"],
+                "verbose_name": "Бронирование",
+                "verbose_name_plural": "Бронирования",
+            },
         ),
         migrations.AlterModelOptions(
-            name='menuitem',
-            options={'ordering': ['category', 'order', 'name'], 'verbose_name': 'Пункт меню', 'verbose_name_plural': 'Пункты меню'},
+            name="menuitem",
+            options={
+                "ordering": ["category", "order", "name"],
+                "verbose_name": "Пункт меню",
+                "verbose_name_plural": "Пункты меню",
+            },
         ),
         migrations.AlterModelOptions(
-            name='sitecontent',
-            options={'ordering': ['key'], 'verbose_name': 'Контент сайта', 'verbose_name_plural': 'Контент сайта'},
+            name="sitecontent",
+            options={
+                "ordering": ["key"],
+                "verbose_name": "Контент сайта",
+                "verbose_name_plural": "Контент сайта",
+            },
         ),
         migrations.AlterModelOptions(
-            name='table',
-            options={'ordering': ['number'], 'verbose_name': 'Столик', 'verbose_name_plural': 'Столики'},
+            name="table",
+            options={
+                "ordering": ["number"],
+                "verbose_name": "Столик",
+                "verbose_name_plural": "Столики",
+            },
         ),
         migrations.AlterModelOptions(
-            name='teammember',
-            options={'ordering': ['name'], 'verbose_name': 'Член команды', 'verbose_name_plural': 'Члены команды'},
+            name="teammember",
+            options={
+                "ordering": ["name"],
+                "verbose_name": "Член команды",
+                "verbose_name_plural": "Члены команды",
+            },
         ),
         migrations.RenameField(
-            model_name='booking',
-            old_name='comment',
-            new_name='comments',
+            model_name="booking",
+            old_name="comment",
+            new_name="comments",
         ),
         migrations.RenameField(
-            model_name='booking',
-            old_name='guests',
-            new_name='guests_count',
+            model_name="booking",
+            old_name="guests",
+            new_name="guests_count",
         ),
         migrations.AddField(
-            model_name='table',
-            name='is_available',
-            field=models.BooleanField(default=True, verbose_name='Доступен'),
+            model_name="table",
+            name="is_available",
+            field=models.BooleanField(default=True, verbose_name="Доступен"),
         ),
     ]
