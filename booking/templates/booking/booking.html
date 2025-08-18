@@ -1,0 +1,599 @@
+{% extends 'base.html' %}
+
+{% block title %}Бронирование столика - Dzūkija{% endblock %}
+
+{% block extra_css %}
+<style>
+    .booking-section {
+        background: linear-gradient(135deg, #2E6E4F, #1A3D2E);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    
+    .booking-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        border: 2px solid #E6B325;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .booking-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #E6B325, #F4D03F, #E6B325);
+        background-size: 200% 100%;
+        animation: shimmer 3s ease-in-out infinite;
+    }
+    
+    .booking-header {
+        background: linear-gradient(135deg, #E6B325, #D4A017);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+    }
+    
+    .booking-header::before {
+        content: '❦';
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 1.5rem;
+        opacity: 0.7;
+    }
+    
+    .booking-header::after {
+        content: '❦';
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 1.5rem;
+        opacity: 0.7;
+    }
+    
+    .booking-title {
+        font-family: 'Cinzel', serif;
+        font-size: 2.5rem;
+        margin: 0;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+    
+    .booking-subtitle {
+        font-family: 'Great Vibes', cursive;
+        font-size: 1.5rem;
+        margin-top: 0.5rem;
+        opacity: 0.9;
+    }
+    
+    .booking-body {
+        padding: 3rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #2E6E4F;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .form-control {
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .form-control:focus {
+        border-color: #E6B325;
+        box-shadow: 0 0 0 0.2rem rgba(230, 179, 37, 0.25);
+        outline: none;
+    }
+    
+    .form-control.is-invalid {
+        border-color: #dc3545;
+    }
+    
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    .btn-booking {
+        background: linear-gradient(45deg, #E6B325, #F4D03F);
+        border: none;
+        color: #1A3D2E;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 1rem;
+    }
+    
+    .btn-booking:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(230, 179, 37, 0.4);
+        color: #1A3D2E;
+    }
+    
+    .table-info {
+        background: rgba(230, 179, 37, 0.05);
+        border: 1px solid rgba(230, 179, 37, 0.2);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .table-info h4 {
+        color: #2E6E4F;
+        margin-bottom: 1rem;
+        font-family: 'Playfair Display', serif;
+    }
+    
+
+    
+    .alert {
+        border-radius: 10px;
+        border: none;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .alert-success {
+        background: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+        border-left: 4px solid #28a745;
+    }
+    
+    .alert-danger {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        border-left: 4px solid #dc3545;
+    }
+    
+    @keyframes shimmer {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    
+    .ornament-divider {
+        text-align: center;
+        margin: 2rem 0;
+        color: #E6B325;
+        font-size: 1.5rem;
+        opacity: 0.7;
+    }
+    
+    @media (max-width: 768px) {
+        .booking-body {
+            padding: 2rem;
+        }
+        
+        .booking-title {
+            font-size: 2rem;
+        }
+        
+        .booking-subtitle {
+            font-size: 1.2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="booking-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="booking-card">
+                    <div class="booking-header">
+                        <h1 class="booking-title">Бронирование столика</h1>
+                        <div class="booking-subtitle">Dzūkija</div>
+                    </div>
+                    
+                    <div class="booking-body">
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }}">
+                                    <i class="bi bi-{% if message.tags == 'success' %}check-circle{% else %}exclamation-triangle{% endif %} me-2"></i>
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        
+                        {% if selected_item %}
+                            <div class="alert alert-info" style="background: rgba(230, 179, 37, 0.1); border-left: 4px solid #E6B325; color: #2E6E4F;">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-cart-check me-3" style="font-size: 1.5rem; color: #E6B325;"></i>
+                                    <div>
+                                        <h5 class="mb-1">Выбранное блюдо</h5>
+                                        <p class="mb-0">
+                                            <strong>{{ selected_item.name }}</strong> - {{ selected_item.price }} ₽
+                                            <br>
+                                            <small class="text-muted">{{ selected_item.category.name }} • {{ selected_item.weight }}</small>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="table-info">
+                            <h4>
+                                <i class="bi bi-table me-2"></i>
+                                Доступные столики
+                            </h4>
+                            <div class="row mb-3">
+                                <div class="col-md-4 text-center">
+                                    <div class="table-stat" style="background: rgba(40, 167, 69, 0.1); border-radius: 10px; padding: 1rem;">
+                                        <i class="bi bi-people" style="font-size: 1.5rem; color: #28a745;"></i>
+                                        <div class="table-stat-number" style="font-size: 1.2rem; font-weight: bold; color: #28a745;">5</div>
+                                        <div class="table-stat-label" style="font-size: 0.9rem; color: #666;">Столиков на 2</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <div class="table-stat" style="background: rgba(230, 179, 37, 0.1); border-radius: 10px; padding: 1rem;">
+                                        <i class="bi bi-people-fill" style="font-size: 1.5rem; color: #E6B325;"></i>
+                                        <div class="table-stat-number" style="font-size: 1.2rem; font-weight: bold; color: #E6B325;">15</div>
+                                        <div class="table-stat-label" style="font-size: 0.9rem; color: #666;">Столиков на 4</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <div class="table-stat" style="background: rgba(46, 110, 79, 0.1); border-radius: 10px; padding: 1rem;">
+                                        <i class="bi bi-people" style="font-size: 1.5rem; color: #2E6E4F;"></i>
+                                        <div class="table-stat-number" style="font-size: 1.2rem; font-weight: bold; color: #2E6E4F;">3</div>
+                                        <div class="table-stat-label" style="font-size: 0.9rem; color: #666;">Столиков на 6</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-muted mb-0">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    Всего столиков: <strong>{{ tables.count }}</strong> | 
+                                    Вместимость: от 2 до 6 человек
+                                </p>
+                            </div>
+                            
+                            <!-- Подробная информация о столиках -->
+                            <div class="table-details mt-3" style="background: rgba(46, 110, 79, 0.05); border: 1px solid rgba(46, 110, 79, 0.2); border-radius: 15px; padding: 1.5rem;">
+                                <h5 style="color: #2E6E4F; margin-bottom: 1rem; font-family: 'Playfair Display', serif;">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    Подробная информация о столиках
+                                </h5>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="table-category">
+                                            <h6 style="color: #28a745; font-weight: 600;">
+                                                <i class="bi bi-heart me-2"></i>Романтические столики
+                                            </h6>
+                                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;">
+                                                Столики №1-5 для двоих
+                                            </p>
+                                            <ul style="font-size: 0.85rem; color: #666; padding-left: 1.2rem;">
+                                                <li>Уютные места у окна</li>
+                                                <li>Идеально для свиданий</li>
+                                                <li>Тихие уголки</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="table-category">
+                                            <h6 style="color: #E6B325; font-weight: 600;">
+                                                <i class="bi bi-people me-2"></i>Семейные столики
+                                            </h6>
+                                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;">
+                                                Столики №6-20 для 4 человек
+                                            </p>
+                                            <ul style="font-size: 0.85rem; color: #666; padding-left: 1.2rem;">
+                                                <li>Комфортные для семьи</li>
+                                                <li>Подходят для друзей</li>
+                                                <li>Деловые встречи</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="table-category">
+                                            <h6 style="color: #2E6E4F; font-weight: 600;">
+                                                <i class="bi bi-people-fill me-2"></i>Большие компании
+                                            </h6>
+                                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;">
+                                                Столики №21-23 для 6 человек
+                                            </p>
+                                            <ul style="font-size: 0.85rem; color: #666; padding-left: 1.2rem;">
+                                                <li>Просторные места</li>
+                                                <li>Для больших групп</li>
+                                                <li>Праздничные встречи</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="ornament-divider">❦ ❦ ❦</div>
+                        
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.name.id_for_label }}" class="form-label">
+                                            <i class="bi bi-person me-2"></i>Имя
+                                        </label>
+                                        {{ form.name }}
+                                        {% if form.name.errors %}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.name.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.phone.id_for_label }}" class="form-label">
+                                            <i class="bi bi-telephone me-2"></i>Телефон
+                                        </label>
+                                        {{ form.phone }}
+                                        {% if form.phone.errors %}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.phone.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.date.id_for_label }}" class="form-label">
+                                            <i class="bi bi-calendar me-2"></i>Дата
+                                        </label>
+                                        {{ form.date }}
+                                        {% if form.date.errors %}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.date.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.time.id_for_label }}" class="form-label">
+                                            <i class="bi bi-clock me-2"></i>Время
+                                        </label>
+                                        {{ form.time }}
+                                        {% if form.time.errors %}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.time.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.table.id_for_label }}" class="form-label">
+                                            <i class="bi bi-table me-2"></i>Столик
+                                        </label>
+                                        {{ form.table }}
+                                        {% if form.table.errors %}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.table.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.guests_count.id_for_label }}" class="form-label">
+                                            <i class="bi bi-people me-2"></i>Количество гостей
+                                        </label>
+                                        {{ form.guests_count }}
+                                        {% if form.guests_count.errors %}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.guests_count.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.comments.id_for_label }}" class="form-label">
+                                    <i class="bi bi-chat-text me-2"></i>Комментарий (необязательно)
+                                </label>
+                                {{ form.comments }}
+                                {% if form.comments.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.comments.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Секция выбора блюд из меню -->
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="bi bi-cart-plus me-2"></i>Предзаказ блюд из меню (необязательно)
+                                </label>
+                                <div class="menu-selection" style="background: rgba(230, 179, 37, 0.05); border: 1px solid rgba(230, 179, 37, 0.2); border-radius: 15px; padding: 1.5rem; margin-top: 1rem;">
+                                    <div class="row">
+                                        {% for value, text in form.selected_items.field.choices %}
+                                            <div class="col-md-6 mb-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="{{ form.selected_items.name }}" value="{{ value }}" id="item_{{ value }}" onchange="calculateTotal()">
+                                                    <label class="form-check-label" for="item_{{ value }}" style="font-size: 0.9rem;">
+                                                        {{ text }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        {% empty %}
+                                            <div class="col-12">
+                                                <p class="text-muted text-center mb-0">
+                                                    <i class="bi bi-info-circle me-2"></i>
+                                                    Блюда из меню временно недоступны
+                                                </p>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% if form.selected_items.field.choices %}
+                                        <div class="text-center mt-3">
+                                            <small class="text-muted">
+                                                <i class="bi bi-info-circle me-1"></i>
+                                                Выбранные блюда будут приготовлены к вашему приходу
+                                            </small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Секция предоплаты -->
+                            <div class="form-group" id="deposit-section" style="display: none;">
+                                <label for="{{ form.deposit_amount.id_for_label }}" class="form-label">
+                                    <i class="bi bi-credit-card me-2"></i>Сумма предоплаты (₽)
+                                </label>
+                                {{ form.deposit_amount }}
+                                {% if form.deposit_amount.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.deposit_amount.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Предоплата требуется только при предзаказе блюд. Минимальная предоплата 500 ₽ или 30% от суммы заказа.
+                                </div>
+                                
+                                <!-- Информация о расчетах -->
+                                <div id="payment-info" style="background: rgba(46, 110, 79, 0.05); border: 1px solid rgba(46, 110, 79, 0.2); border-radius: 10px; padding: 1rem; margin-top: 1rem; display: none;">
+                                    <h6 style="color: #2E6E4F; margin-bottom: 0.5rem;">
+                                        <i class="bi bi-calculator me-2"></i>Расчет предоплаты
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <small class="text-muted">Сумма предзаказа:</small>
+                                            <div id="preorder-total" style="font-weight: bold; color: #E6B325;">0 ₽</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <small class="text-muted">Минимальная предоплата:</small>
+                                            <div id="min-deposit" style="font-weight: bold; color: #2E6E4F;">500 ₽</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-booking">
+                                <i class="bi bi-calendar-check me-2"></i>
+                                {% if selected_item %}
+                                    Забронировать столик и заказать блюдо
+                                {% else %}
+                                    Забронировать столик
+                                {% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+// Данные о ценах блюд (получаем из Django)
+const menuItems = {
+    {% for value, text in form.selected_items.field.choices %}
+        '{{ value }}': {
+            price: parseFloat('{{ text }}'.split(' - ')[1].split(' ₽')[0]),
+            name: '{{ text }}'.split(' - ')[0]
+        },
+    {% endfor %}
+};
+
+function calculateTotal() {
+    let total = 0;
+    const selectedItems = document.querySelectorAll('input[name="{{ form.selected_items.name }}"]:checked');
+    
+    selectedItems.forEach(item => {
+        if (menuItems[item.value]) {
+            total += menuItems[item.value].price;
+        }
+    });
+    
+    // Обновляем отображение суммы предзаказа
+    document.getElementById('preorder-total').textContent = total + ' ₽';
+    
+    // Рассчитываем минимальную предоплату
+    let minDeposit = 500;
+    if (total > 0) {
+        minDeposit = Math.max(500, total * 0.3);
+    }
+    document.getElementById('min-deposit').textContent = Math.ceil(minDeposit) + ' ₽';
+    
+    // Показываем/скрываем блок с информацией
+    const paymentInfo = document.getElementById('payment-info');
+    if (total > 0) {
+        paymentInfo.style.display = 'block';
+    } else {
+        paymentInfo.style.display = 'none';
+    }
+    
+    // Устанавливаем минимальное значение в поле предоплаты только при предзаказе
+    const depositField = document.getElementById('{{ form.deposit_amount.id_for_label }}');
+    if (total > 0 && depositField && depositField.value < minDeposit) {
+        depositField.value = Math.ceil(minDeposit);
+    }
+    
+    // Скрываем/показываем секцию предоплаты
+    const depositSection = document.getElementById('deposit-section');
+    if (total > 0) {
+        depositSection.style.display = 'block';
+    } else {
+        depositSection.style.display = 'none';
+        depositField.value = '';
+    }
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    calculateTotal();
+});
+</script>
+{% endblock %} 
