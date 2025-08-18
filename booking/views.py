@@ -10,12 +10,12 @@ from django.views.decorators.http import require_POST
 
 from .forms import BookingForm, ContactForm
 from .models import Booking, SiteContent, Table, TeamMember
-from menu.models import MenuItem
 from .utils import (
     format_booking_notification,
     format_contact_message,
     send_telegram_message,
 )
+from menu.models import MenuItem
 
 
 def home(request):
