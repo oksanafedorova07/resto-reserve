@@ -92,7 +92,6 @@ jobs:
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
             # Проверка подключения
@@ -101,7 +100,7 @@ jobs:
             pwd
             ls -la
 
-            # Перейти в домашнюю папку
+            # Перейти в домашнюю папку пользователя
             cd /home/${{ secrets.DEPLOY_USER }} || exit
             echo "📁 Перешел в папку: $(pwd)"
 
@@ -119,11 +118,9 @@ jobs:
             cd resto-reserve || exit
             echo "📁 Перешел в папку проекта: $(pwd)"
 
-            # Убедиться, что нужная ветка существует
-            echo "🌿 Получаю ветку: ${{ github.ref_name }}"
-            git fetch origin ${{ github.ref_name }}
-
             # Переключиться на ветку и обновиться
+            echo "🌿 Переключаюсь на ветку: ${{ github.ref_name }}"
+            git fetch origin ${{ github.ref_name }}
             git checkout ${{ github.ref_name }}
             git pull origin ${{ github.ref_name }}
 
