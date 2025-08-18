@@ -1,0 +1,120 @@
+name: 🔒 Проверка безопасности
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Запуск каждый день в 6:00 UTC
+    - cron: '0 6 * * *'
+
+jobs:
+  security-scan:
+    name: 🔍 Сканирование безопасности
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🐍 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: 📦 Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: 🔍 Run Bandit security scan
+      run: |
+        pip install bandit
+        bandit -r . -f json -o bandit-report.json || true
+
+    - name: 🔍 Run Safety check
+      run: |
+        pip install safety
+        safety check --json --output safety-report.json || true
+
+    - name: 🔍 Run Semgrep
+      uses: returntocorp/semgrep-action@v1
+      with:
+        config: >-
+          p/security-audit
+          p/secrets
+          p/owasp-top-ten
+        output-format: sarif
+        output-file: semgrep-results.sarif
+
+    - name: 📊 Upload security reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          safety-report.json
+          semgrep-results.sarif
+
+    - name: 🚨 Security alerts
+      if: failure()
+      run: |
+        echo "🚨 Обнаружены проблемы безопасности!"
+        echo "Проверьте отчеты в артефактах"
+
+  dependency-vulnerabilities:
+    name: 📦 Проверка уязвимостей зависимостей
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🔍 Check for known vulnerabilities
+      uses: snyk/actions/python@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --severity-threshold=high
+
+  code-quality:
+    name: 📊 Качество кода
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🐍 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: 📦 Install code quality tools
+      run: |
+        pip install flake8 black isort mypy pylint
+
+    - name: 🔍 Run code quality checks
+      run: |
+        # Flake8 для проверки стиля
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        
+        # Black для форматирования
+        black --check .
+        
+        # isort для сортировки импортов
+        isort --check-only .
+        
+        # MyPy для проверки типов
+        mypy . --ignore-missing-imports
+        
+        # Pylint для анализа кода
+        pylint **/*.py --disable=C0114,C0116
+
+    - name: 📊 Upload quality report
+      uses: actions/upload-artifact@v4
+      with:
+        name: code-quality-report
+        path: |
+          .pylint.d/
+          .mypy_cache/
