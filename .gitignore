@@ -135,6 +135,9 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# Keep .env.example in version control
+!.env.example
 .idea/
 
 # Spyder project settings
@@ -161,6 +164,7 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
@@ -173,3 +177,25 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Bootstrap files (если используете CDN, то эти файлы не нужны в репозитории)
+static/css/bootstrap*
+static/js/bootstrap*
+static/css/all.min.css
+static/js/all.min.js
+
+# Font Awesome files
+static/css/all.min.css
+static/webfonts/
+
+# Third-party libraries (если используете CDN)
+static/css/*.min.css
+static/js/*.min.js
+static/css/*.map
+static/js/*.map
+
+# Keep custom CSS/JS files
+!static/css/custom*
+!static/js/custom*
+!static/css/index.css
+!static/js/index.js
